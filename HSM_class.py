@@ -38,7 +38,7 @@ class ThalesBogr:
 		self.Port=aPort
 		self.tcpcon=socket.socket(socket.AF_INET, socket.SOCK_STREAM)	
 		self.HSMcmdHead = "TLSB"
-		print LOG+"\n\nThalesBogor v"+AVL+"0.1"+RST+" - Copyright (c) 2014 Bondan Sumbodo\n"
+		print LOG+"\n\nThalesBogr v"+AVL+"0.1"+RST+" - Copyright (c) 2014 Bondan Sumbodo\n"
 	def connect(self):
 		self.tcpcon.connect((self.IP, self.Port))
 		self.tcpcon.send(self.Exclude_Bigendian_Hdr(self.HSMcmdHead+"NC"))
