@@ -2,7 +2,7 @@
 
 Is a pyhton script to provide a tool to test your command against Thales HSM / Racal. A class called `ThalesBogr` in `HSM_class.py` is introduced to handle your basic needs of sending a trial host command to Thales HSM. 
 
-Currently support following preformatting function to contruct a host command:
+Currently support following preformatting function to construct a host command:
 
 1. EE Derive IBM3624 PIN
 2. NG Get Clear PIN
