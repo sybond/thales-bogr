@@ -1,4 +1,4 @@
-﻿# The MIT License (MIT)
+# The MIT License (MIT)
 # 
 # Copyright (c) 2014 Bondan Sumbodo
 # 
@@ -38,7 +38,7 @@ class ThalesBogr:
 		self.Port=aPort
 		self.tcpcon=socket.socket(socket.AF_INET, socket.SOCK_STREAM)	
 		self.HSMcmdHead = "TLSB"
-		print LOG+"\n\nThalesBogr v"+AVL+"0.1"+RST+" - Copyright (c) 2014 Bondan Sumbodo\n"
+		print LOG+"\n\nThalesBogor v"+AVL+"0.1"+RST+" - Copyright (c) 2014 Bondan Sumbodo\n"
 	def connect(self):
 		self.tcpcon.connect((self.IP, self.Port))
 		self.tcpcon.send(self.Exclude_Bigendian_Hdr(self.HSMcmdHead+"NC"))
@@ -56,7 +56,7 @@ class ThalesBogr:
 		print RST+"The minimum PIN length:"+AVL,ChkLength
 		print RST+"PIN Validation Data:"+AVL,PINValidation
 		print RST+"PIN Offset:"+AVL,PINOffset,"\n"+RST
-		return HSMcmdHead+"EE"+PVK+PINOffset+"%02d" % ChkLength+AccNum+DecTable+PINValidation
+		return self.HSMcmdHead+"EE"+PVK+PINOffset+"%02d" % ChkLength+AccNum+DecTable+PINValidation
 	def thales_EE_Response(self,AResponse):
 		print LOG+"Derive a PIN Using the IBM Method Response"
 		print RST+"Response:"+AVL,AResponse[8:10]
@@ -67,7 +67,7 @@ class ThalesBogr:
 		print LOG+"Decrypt an Encrypted PIN"
 		print RST+"Account Number:"+AVL,AccNum
 		print RST+"PIN under LMK:"+AVL,PINuLMK,"\n"+RST
-		return HSMcmdHead+"NG"+AccNum+PINuLMK
+		return self.HSMcmdHead+"NG"+AccNum+PINuLMK
 	def thales_NG_Response(self,AResponse):
 		print LOG+"Decrypt an Encrypted PIN Response"
 		print RST+"Response:"+AVL,AResponse[8:10]
@@ -81,7 +81,7 @@ class ThalesBogr:
 		print RST+"PIN block format code:"+AVL,"%02d" % PINfmt
 		print RST+"Account Number:"+AVL,AccNum
 		print RST+"PIN under LMK:"+AVL,PINuLMK,"\n"+RST
-		return HSMcmdHead+"JG"+ZPK+"%02d" % PINfmt+AccNum+PINuLMK
+		return self.HSMcmdHead+"JG"+ZPK+"%02d" % PINfmt+AccNum+PINuLMK
 	def thales_JG_Response(self,AResponse):
 		print LOG+"Translate a PIN from LMK to ZPK Encryption Response"
 		print RST+"Response:"+AVL,AResponse[8:10]
@@ -92,7 +92,7 @@ class ThalesBogr:
 		print LOG+"Generate a Random PIN"
 		print RST+"PAN:"+AVL,PAN
 		print RST+"PIN length:"+AVL,PINLength,"\n"+RST
-		return HSMcmdHead+"JA"+PAN+"%02d" % PINLength
+		return self.HSMcmdHead+"JA"+PAN+"%02d" % PINLength
 	def thales_JA_Response(self,AResponse):
 		print LOG+"Generate a Random PIN Response"
 		print RST+"Response:"+AVL,AResponse[8:10]
@@ -106,7 +106,7 @@ class ThalesBogr:
 		print RST+"Account Number:"+AVL,AccNum
 		print RST+"Decimalisation Table:"+AVL,DecTable
 		print RST+"PIN Validation Data:"+AVL,PINValidation,"\n"+RST
-		return HSMcmdHead+"DE"+PVK+PINuLMK+"%02d" % ChkLength+AccNum+DecTable+PINValidation
+		return self.HSMcmdHead+"DE"+PVK+PINuLMK+"%02d" % ChkLength+AccNum+DecTable+PINValidation
 	def thales_DE_Response(self,AResponse):
 		print LOG+"Generate an IBM PIN Offset Response"
 		print RST+"Response:"+AVL,AResponse[8:10]
@@ -123,18 +123,23 @@ class ThalesBogr:
 			print RST+"Firmware number:"+AVL,AResponse[26:]
 		print RST
 	def SendRawToHSM(self,aCmd):
-		print RST+"Sending:"+AVL,aCmd
+		print RST+"Sending:"
+		print AVL+aCmd.encode('hex')
 		self.tcpcon.send(self.Exclude_Bigendian_Hdr(self.HSMcmdHead+aCmd))
 		data=self.tcpcon.recv(BUFFER_SIZE)
-		print RST+"Response:"+AVL,data[6:],RST
+		print RST+"Response:"
+		print AVL+data[6:].encode('hex'),RST
 	def GenPINOffset(self,CARD_NUM):
-		print "Card",CARD_NUM
-		GetClearPINFromPINOffset(CARD_NUM[len(CARD_NUM)-13:len(CARD_NUM)-1],"U35EB1B1605CC1DAC6017E46457EB28D6","111111FFFFFF","F93900465534BECA",6,CARD_NUM[len(CARD_NUM)-16:len(CARD_NUM)-6]+"N"+CARD_NUM[len(CARD_NUM)-1:len(CARD_NUM)])
+		print RST+"Card"+AVL,CARD_NUM
+		self.GetClearPINFromPINOffset(CARD_NUM[len(CARD_NUM)-13:len(CARD_NUM)-1],"U35EB1B1605CC1DAC6017E46457EB28D6","111111FFFFFF","F93900465534BECA",6,CARD_NUM[len(CARD_NUM)-16:len(CARD_NUM)-6]+"N"+CARD_NUM[len(CARD_NUM)-1:len(CARD_NUM)])
 	def GetClearPINFromPINOffset(self,AccNum,PVK,PINOffset,DecTable,ChkLength,PINValidation):
-		print "Get Clear PIN From PIN Offset",AccNum,PINValidation
-		self.tcpcon.send(Exclude_Bigendian_Hdr(thales_EE_DeriveIBM3624PIN(AccNum,PVK,PINOffset,DecTable,ChkLength,PINValidation)))
+		print RST+"Get Clear PIN From PIN Offset"
+		print RST+"AccountNumber"+AVL,AccNum,RST+"PINValidation"+AVL,PINValidation
+		self.tcpcon.send(self.Exclude_Bigendian_Hdr(self.thales_EE_DeriveIBM3624PIN(AccNum,PVK,PINOffset,DecTable,ChkLength,PINValidation)))
 		data=self.tcpcon.recv(BUFFER_SIZE)
-		self.tcpcon.send(Exclude_Bigendian_Hdr(thales_NG_GetClearPIN(AccNum,data[10:])))
+		self.tcpcon.send(self.Exclude_Bigendian_Hdr(self.thales_NG_GetClearPIN(AccNum,data[10:])))
 		data=self.tcpcon.recv(BUFFER_SIZE)
-		thales_NG_Response(data)
+		self.thales_NG_Response(data)
 		print RST+"Clear PIN:"+AVL,data[10:16]
+	def removeNPC(self,text):
+		return ''.join([i if ord(i) < 128 else '~' for i in text])
