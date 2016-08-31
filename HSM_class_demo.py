@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # The MIT License (MIT)
 # 
 # Copyright (c) 2014 Bondan Sumbodo
@@ -20,14 +21,24 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-#!/usr/bin/env python
-
 # Sample usage of ThalesBogr class
 # - Send NC host-command to HSM
 #
 
-from HSM_class import ThalesBogr
-test = ThalesBogor("10.99.30.181",9000)
-test.connect()
-test.SendRawToHSM("NC")
-test.disconnect()
+from HSM_class import *
+
+
+#create ThalesBogr instance as hsm
+hsm = ThalesBogr("10.99.30.181",9000)
+
+#connect and perform selftest
+hsm.connect()
+hsm.selftest()
+
+#sending 
+
+hsm.GenPinblockFromClear("1111","6213440000001234","U741521AFC27713C2DC0989B1D0F25D6E")
+hsm.SendRawToHSM(hsm.thales_NG_GetClearPIN("6213440000001234","9803479"))
+
+#close connection
+hsm.disconnect()
