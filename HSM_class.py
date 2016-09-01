@@ -118,6 +118,7 @@ class ThalesBogr:
 			print RST+"Unparsed:"+AVL,AResponse[10:]
 		print "\n"+RST	
 	def thales_NG_GetClearPIN(self,AccNum,PINuLMK):
+		AccNum=AccNum[len(AccNum)-13:len(AccNum)-1]
 		print LOG+"Decrypt an Encrypted PIN"
 		print RST+"Account Number:"+AVL,AccNum
 		print RST+"PIN under LMK:"+AVL,PINuLMK,"\n"+RST
@@ -152,6 +153,16 @@ class ThalesBogr:
 		print RST+"Response:"+AVL,AResponse[8:10]
 		if (AResponse[8:10] == '00'):
 			print RST+"PIN under LMK:"+AVL,AResponse[10:],"\n"+RST
+	def thales_EC_verifyVISA(self,ZPK,PVK,PINblock,PBformat,AccNum,PVKI,PVV):
+		print LOG+"Verify Interchange PIN using VISA"
+		print RST+"ZPK:",AVL+ZPK
+		print RST+"PVK",AVL+PVK
+		print RST+"PIN Block:",AVL+PINblock
+		print RST+"PIN Block Format:",AVL+PBformat
+		print RST+"Account Number:",AVL+AccNum
+		print RST+"PVKI:",AVL+PVKI
+		print RST+"PVV:",AVL+PVV
+		return HSMcmdHead+"EC"+ZPK+PVK+PINblock+PBformat+AccNum+PVKI+PVV
 	def thales_DE_genIBMPIN(self,PVK,PINuLMK,ChkLength,AccNum,DecTable,PINValidation):
 		print LOG+"Generate an IBM PIN Offset"
 		print RST+"PVK:"+AVL,PVK
@@ -170,11 +181,13 @@ class ThalesBogr:
 		return chr(lenData >> 8)+chr(lenData & 255)+Adata
 	def SendRawToHSM(self,aCmd):
 		print RST+"Sending:"
-		print AVL+aCmd.encode('hex')
+		print AVL+self.removeNPC(aCmd)
 		self.tcpcon.send(Exclude_Bigendian_Hdr(HSMcmdHead+aCmd))
 		data=self.tcpcon.recv(BUFFER_SIZE)
 		print RST+"Response:"
-		print AVL+data[6:].encode('hex'),RST
+		print AVL+self.removeNPC(data),RST
+		if (data[8:10] != '00'):
+			print "Error:",AVL+ErrDesc(data[8:10]),RST
 	def GenPINOffset(self,CARD_NUM):
 		print RST+"Card"+AVL,CARD_NUM
 		self.GetClearPINFromPINOffset(CARD_NUM[len(CARD_NUM)-13:len(CARD_NUM)-1],"U35EB1B1605CC1DAC6017E46457EB28D6","111111FFFFFF","F93900465534BECA",6,CARD_NUM[len(CARD_NUM)-16:len(CARD_NUM)-6]+"N"+CARD_NUM[len(CARD_NUM)-1:len(CARD_NUM)])
