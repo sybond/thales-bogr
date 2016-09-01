@@ -22,8 +22,6 @@
 # SOFTWARE.
 
 # Sample usage of ThalesBogr class
-# - Send NC host-command to HSM
-#
 
 from HSM_class import *
 
@@ -35,9 +33,8 @@ hsm = ThalesBogr("10.99.30.181",9000)
 hsm.connect()
 hsm.selftest()
 
-#sending 
-
-hsm.GenPinblockFromClear("1111","6213440000001234","U741521AFC27713C2DC0989B1D0F25D6E")
+#hsm.GenPinblockFromClear("1111","6213440000001234","U741521AFC27713C2DC0989B1D0F25D6E")
+#constructing NG command and send to HSM
 hsm.SendRawToHSM(hsm.thales_NG_GetClearPIN("6213440000001234","9803479"))
 
 #close connection
